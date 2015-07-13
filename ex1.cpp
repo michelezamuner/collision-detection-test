@@ -2,27 +2,49 @@
 #include <GL/gl.h>
 #include <math.h>
 #include <stdio.h>
+#include <sys/time.h>
+#include <unistd.h>
 
+/**
+ * Masses
+ */
 #define M1 10
-#define M2 10
-#define Dt 0.1
+#define M2 50
+
+#define Dt 0.017
+
+/**
+ * Distance threshold to trigger collision
+ */
 #define dc 0.3
+
+/**
+ * Elasticity (<= 1)
+ */
 #define e 1
 
-float x1[2] = {-10.0f,10.0f}, x2[2] = {0.0f,0.0f},
-		v1[2] = {1.0f,-1.0f}, v2[2] = {0.0f,0.0f};
+float x1[2] = {-10.0f,10.0f},    // Position of body 1
+      x2[2] = {10.0f,10.0f},       // Position of body 2
+      v1[2] = {1.0f,-1.0f},      // Velocity of body 1
+      v2[2] = {-1.0f,-1.0f};       // Velocity of body 2
+
+struct timeval start;
+long mtime = 0;
+float kinetic = 0;
 
 float distance (float* x1, float* x2) {
 	return sqrt ( (x1[0]-x2[0])*(x1[0]-x2[0]) + (x1[1]-x2[1])*(x1[1]-x2[1]) );
 }
 
 void drawSquare (float* centre, float l) {
+	glPushMatrix();
 	glBegin (GL_POLYGON);
-		glVertex2f (centre[0]-l/2, centre[1]-l/2);
-		glVertex2f (centre[0]+l/2, centre[1]-l/2);
-		glVertex2f (centre[0]+l/2, centre[1]+l/2);
-		glVertex2f (centre[0]-l/2, centre[1]+l/2);
+	glVertex2f (centre[0]-l/2, centre[1]-l/2);
+	glVertex2f (centre[0]+l/2, centre[1]-l/2);
+	glVertex2f (centre[0]+l/2, centre[1]+l/2);
+	glVertex2f (centre[0]-l/2, centre[1]+l/2);
 	glEnd ();
+	glPopMatrix();
 }
 
 void CalculatePositions () {
@@ -51,23 +73,70 @@ void CalculatePositions () {
 	}
 }
 
+void drawText(const char* text, const int length)
+{
+	int i = 0;
+	for (; i < length; i++)
+	{
+		glutStrokeCharacter(GLUT_STROKE_ROMAN, text[i]);
+	}
+}
+
+// 60 FPS = at least 17 milliseconds
 void display () {
+	struct timeval start, end;
+	gettimeofday(&start, NULL);
+	
 	glClear (GL_COLOR_BUFFER_BIT);
 
-	glColor3f (1.0f, 1.0f, 1.0f);
+	glColor3f(1.0f, 1.0f, 1.0f);
+
+	char text[15] = "              ";
+	glPushMatrix();
+	glTranslatef(-10.0f, 9.0f, 0.0f);
+	glScalef(0.005, 0.005, 0.005);
+	sprintf(text, "Time: %ld", mtime);
+	drawText(text, 15);
+	glPopMatrix();
+
+	glPushMatrix();
+	glTranslatef(-10.0f, 8.0f, 0.0f);
+	glScalef(0.005, 0.005, 0.005);
+	sprintf(text, "Kinetic: %f", kinetic);
+	drawText(text, 15);
+	glPopMatrix();
+
 	drawSquare (x1, 0.2);
 	glColor3f (1.0f, 0.0f, 0.0f);
 	drawSquare (x2, 0.2);
 
+	int minTimeFrame = 17;
+	gettimeofday(&end, NULL);
+	long mstart = start.tv_sec * 1000 + start.tv_usec/1000.0 + 0.5;
+	long mend = end.tv_sec * 1000 + end.tv_usec/1000.0 + 0.5;
+	long mdiff = mend - mstart;
+	long timetowait = 0;
+	if (mdiff < minTimeFrame) timetowait = minTimeFrame - mdiff;
+	if (timetowait > 0)
+	{
+		usleep(timetowait * 1000);
+	}
 	glutSwapBuffers ();
 }
 
 void idle () {
+	struct timeval t;
+	gettimeofday(&t, NULL);
+	mtime = ((t.tv_sec - start.tv_sec) * 1000 + (t.tv_usec - start.tv_usec)/1000.0) + 0.5;
+	float v1m = sqrt(v1[0]*v1[0] + v1[1]*v1[1]);
+	float v2m = sqrt(v2[0]*v2[0] + v2[1]*v2[1]);
+	kinetic = 0.5 * M1 * v1m * v1m + 0.5 * M2 * v2m * v2m;
 	CalculatePositions ();
 	glutPostRedisplay ();
 }
 
 int main (int argc, char** argv) {
+	gettimeofday(&start, NULL);
 	glutInit (&argc, argv);
 	glutInitDisplayMode (GLUT_RGB | GLUT_DOUBLE);
 	glutInitWindowSize (500, 500);

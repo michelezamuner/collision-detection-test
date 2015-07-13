@@ -8,3 +8,4 @@ Compiling exercise2:
 
 ```
 g++ -oex2 ex2.cpp -lGL -lglut -lGLU
+```
