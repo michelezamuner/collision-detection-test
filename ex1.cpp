@@ -86,7 +86,14 @@ void drawText(const char* text, const int length)
 void display () {
 	struct timeval start, end;
 	gettimeofday(&start, NULL);
-	
+
+	float before1[2] = {x1[0], x1[1]};
+	float before2[2] = {x2[0], x2[1]};
+	//printf("Before1: %f, %f\n", before1[0], before1[1]);
+	CalculatePositions();
+	float movement1 = distance(x1, before1);
+	float movement2 = distance(x2, before2);
+
 	glClear (GL_COLOR_BUFFER_BIT);
 
 	glColor3f(1.0f, 1.0f, 1.0f);
@@ -101,6 +108,20 @@ void display () {
 
 	glPushMatrix();
 	glTranslatef(-10.0f, 8.0f, 0.0f);
+	glScalef(0.005, 0.005, 0.005);
+	sprintf(text, "Mov1: %f", movement1);
+	drawText(text, 15);
+	glPopMatrix();
+
+	glPushMatrix();
+	glTranslatef(-10.0f, 7.0f, 0.0f);
+	glScalef(0.005, 0.005, 0.005);
+	sprintf(text, "Mov2: %f", movement2);
+	drawText(text, 15);
+	glPopMatrix();
+
+	glPushMatrix();
+	glTranslatef(-10.0f, 6.0f, 0.0f);
 	glScalef(0.005, 0.005, 0.005);
 	sprintf(text, "Kinetic: %f", kinetic);
 	drawText(text, 15);
@@ -131,7 +152,7 @@ void idle () {
 	float v1m = sqrt(v1[0]*v1[0] + v1[1]*v1[1]);
 	float v2m = sqrt(v2[0]*v2[0] + v2[1]*v2[1]);
 	kinetic = 0.5 * M1 * v1m * v1m + 0.5 * M2 * v2m * v2m;
-	CalculatePositions ();
+	//CalculatePositions ();
 	glutPostRedisplay ();
 }
 
