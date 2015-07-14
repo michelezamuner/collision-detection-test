@@ -23,10 +23,15 @@
  */
 #define e 1
 
-float x1[2] = {-10.0f,10.0f},    // Position of body 1
-      x2[2] = {10.0f,10.0f},       // Position of body 2
-      v1[2] = {1.0f,-1.0f},      // Velocity of body 1
-      v2[2] = {-1.0f,-1.0f};       // Velocity of body 2
+float startx1[2] = {-10.0f, 10.0f},
+      startx2[2] = {10.0f, 10.0f},
+      startv1[2] = {5.0f, -5.0f},
+      startv2[2] = {-5.0f, -5.0f};
+float x1[2] = {startx1[0],startx1[1]},
+      x2[2] = {startx2[0],startx2[1]},
+      v1[2] = {startv1[0],startv1[1]},
+      v2[2] = {startv2[0],startv2[1]},
+      x3[2] = {0.0f, 9.0f};
 
 struct timeval start;
 long mtime = 0;
@@ -73,13 +78,15 @@ void CalculatePositions () {
 	}
 }
 
-void drawText(const char* text, const int length)
+void drawText(const char* text, const int length, const float height)
 {
+	glPushMatrix();
+	glTranslatef(-10.0f, height, 0.0f);
+	glScalef(0.005f, 0.005f, 0.005f);
 	int i = 0;
 	for (; i < length; i++)
-	{
 		glutStrokeCharacter(GLUT_STROKE_ROMAN, text[i]);
-	}
+	glPopMatrix();
 }
 
 // 60 FPS = at least 17 milliseconds
@@ -93,43 +100,30 @@ void display () {
 	CalculatePositions();
 	float movement1 = distance(x1, before1);
 	float movement2 = distance(x2, before2);
+	float tot1 = distance(x1, startx1);
+	float tot2 = distance(x2, startx2);
 
 	glClear (GL_COLOR_BUFFER_BIT);
 
 	glColor3f(1.0f, 1.0f, 1.0f);
 
 	char text[15] = "              ";
-	glPushMatrix();
-	glTranslatef(-10.0f, 9.0f, 0.0f);
-	glScalef(0.005, 0.005, 0.005);
 	sprintf(text, "Time: %ld", mtime);
-	drawText(text, 15);
-	glPopMatrix();
-
-	glPushMatrix();
-	glTranslatef(-10.0f, 8.0f, 0.0f);
-	glScalef(0.005, 0.005, 0.005);
-	sprintf(text, "Mov1: %f", movement1);
-	drawText(text, 15);
-	glPopMatrix();
-
-	glPushMatrix();
-	glTranslatef(-10.0f, 7.0f, 0.0f);
-	glScalef(0.005, 0.005, 0.005);
-	sprintf(text, "Mov2: %f", movement2);
-	drawText(text, 15);
-	glPopMatrix();
-
-	glPushMatrix();
-	glTranslatef(-10.0f, 6.0f, 0.0f);
-	glScalef(0.005, 0.005, 0.005);
+	drawText(text, 15, 9.0f);
 	sprintf(text, "Kinetic: %f", kinetic);
-	drawText(text, 15);
-	glPopMatrix();
+	drawText(text, 15, 8.0f);
+	float v = sqrt(v1[0]*v1[0] + v1[1]*v1[1]);
+	sprintf(text, "V1: %f", v);
+	drawText(text, 15, 7.0f);
+	v = sqrt(v2[0]*v2[0] + v2[1]*v2[1]);
+	sprintf(text, "V2: %f", v);
+	drawText(text, 15, 6.0f);
 
 	drawSquare (x1, 0.2);
 	glColor3f (1.0f, 0.0f, 0.0f);
 	drawSquare (x2, 0.2);
+	glColor3f(0.0f, 1.0f, 0.0f);
+	drawSquare (x3, 1.0f);
 
 	int minTimeFrame = 17;
 	gettimeofday(&end, NULL);
@@ -138,10 +132,7 @@ void display () {
 	long mdiff = mend - mstart;
 	long timetowait = 0;
 	if (mdiff < minTimeFrame) timetowait = minTimeFrame - mdiff;
-	if (timetowait > 0)
-	{
-		usleep(timetowait * 1000);
-	}
+	if (timetowait > 0) usleep(timetowait * 1000);
 	glutSwapBuffers ();
 }
 
