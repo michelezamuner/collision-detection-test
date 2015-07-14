@@ -5,6 +5,8 @@
 #include <sys/time.h>
 #include <unistd.h>
 
+#include "Vector.h"
+
 /**
  * Masses
  */
@@ -23,6 +25,7 @@
  */
 #define e 1
 
+Vector* v = new Vector();
 float startx1[2] = {-10.0f, 10.0f},
       startx2[2] = {10.0f, 10.0f},
       startv1[2] = {5.0f, -5.0f},
@@ -30,8 +33,8 @@ float startx1[2] = {-10.0f, 10.0f},
 float x1[2] = {startx1[0],startx1[1]},
       x2[2] = {startx2[0],startx2[1]},
       v1[2] = {startv1[0],startv1[1]},
-      v2[2] = {startv2[0],startv2[1]},
-      x3[2] = {0.0f, 9.0f};
+      v2[2] = {startv2[0],startv2[1]};
+const Vector& refPos = *new Vector(0.0f, 9.0f);
 
 struct timeval start;
 long mtime = 0;
@@ -41,13 +44,14 @@ float distance (float* x1, float* x2) {
 	return sqrt ( (x1[0]-x2[0])*(x1[0]-x2[0]) + (x1[1]-x2[1])*(x1[1]-x2[1]) );
 }
 
-void drawSquare (float* centre, float l) {
+void drawSquare (const Vector& pos, float size) {
+	float halfSize = size/2;
 	glPushMatrix();
 	glBegin (GL_POLYGON);
-	glVertex2f (centre[0]-l/2, centre[1]-l/2);
-	glVertex2f (centre[0]+l/2, centre[1]-l/2);
-	glVertex2f (centre[0]+l/2, centre[1]+l/2);
-	glVertex2f (centre[0]-l/2, centre[1]+l/2);
+	glVertex2f(pos.getX() - halfSize, pos.getY() - halfSize);
+	glVertex2f(pos.getX() + halfSize, pos.getY() - halfSize);
+	glVertex2f(pos.getX() + halfSize, pos.getY() + halfSize);
+	glVertex2f(pos.getX() - halfSize, pos.getY() + halfSize);
 	glEnd ();
 	glPopMatrix();
 }
@@ -94,14 +98,16 @@ void display () {
 	struct timeval start, end;
 	gettimeofday(&start, NULL);
 
-	float before1[2] = {x1[0], x1[1]};
-	float before2[2] = {x2[0], x2[1]};
-	//printf("Before1: %f, %f\n", before1[0], before1[1]);
+	Vector& prev1 = *new Vector(x1, 2),
+		prev2 = *new Vector(x2, 2),
+		p1, p2;
 	CalculatePositions();
-	float movement1 = distance(x1, before1);
-	float movement2 = distance(x2, before2);
-	float tot1 = distance(x1, startx1);
-	float tot2 = distance(x2, startx2);
+	p1 = *new Vector(x1, 2);
+	p2 = *new Vector(x2, 2);
+	float movement1 = p1.getDistanceFrom(prev1).getModulus(),
+		movement2 = p2.getDistanceFrom(prev2).getModulus(),
+		tot1 = p1.getDistanceFrom(*new Vector(startx1, 2)).getModulus(),
+		tot2 = p2.getDistanceFrom(*new Vector(startx2, 2)).getModulus();
 
 	glClear (GL_COLOR_BUFFER_BIT);
 
@@ -119,11 +125,11 @@ void display () {
 	sprintf(text, "V2: %f", v);
 	drawText(text, 15, 6.0f);
 
-	drawSquare (x1, 0.2);
+	drawSquare (*new Vector(x1[0], x1[1]), 0.2);
 	glColor3f (1.0f, 0.0f, 0.0f);
-	drawSquare (x2, 0.2);
+	drawSquare (*new Vector(x2[0], x2[1]), 0.2);
 	glColor3f(0.0f, 1.0f, 0.0f);
-	drawSquare (x3, 1.0f);
+	drawSquare (refPos, 1.0f);
 
 	int minTimeFrame = 17;
 	gettimeofday(&end, NULL);
