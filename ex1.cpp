@@ -82,11 +82,14 @@ void CalculatePositions () {
 	}
 }
 
-void drawText(const char* text, const int length, const float height)
+//void drawText(const char* text, const int length, const float height)
+void drawText(const char* format, float value, float height, int length = 15)
 {
 	glPushMatrix();
 	glTranslatef(-10.0f, height, 0.0f);
 	glScalef(0.005f, 0.005f, 0.005f);
+        char text[length];
+	sprintf(text, format, value);
 	int i = 0;
 	for (; i < length; i++)
 		glutStrokeCharacter(GLUT_STROKE_ROMAN, text[i]);
@@ -104,26 +107,19 @@ void display () {
 	CalculatePositions();
 	p1 = *new Vector(x1, 2);
 	p2 = *new Vector(x2, 2);
-	float movement1 = p1.getDistanceFrom(prev1).getModulus(),
-		movement2 = p2.getDistanceFrom(prev2).getModulus(),
-		tot1 = p1.getDistanceFrom(*new Vector(startx1, 2)).getModulus(),
-		tot2 = p2.getDistanceFrom(*new Vector(startx2, 2)).getModulus();
 
 	glClear (GL_COLOR_BUFFER_BIT);
 
 	glColor3f(1.0f, 1.0f, 1.0f);
 
-	char text[15] = "              ";
-	sprintf(text, "Time: %ld", mtime);
-	drawText(text, 15, 9.0f);
-	sprintf(text, "Kinetic: %f", kinetic);
-	drawText(text, 15, 8.0f);
-	float v = sqrt(v1[0]*v1[0] + v1[1]*v1[1]);
-	sprintf(text, "V1: %f", v);
-	drawText(text, 15, 7.0f);
-	v = sqrt(v2[0]*v2[0] + v2[1]*v2[1]);
-	sprintf(text, "V2: %f", v);
-	drawText(text, 15, 6.0f);
+	drawText("Time: %.0f", (float)mtime, 9.0f);
+	drawText("Kinetic: %f", kinetic, 8.0f);
+	drawText("V1: %f", sqrt(v1[0]*v1[0] + v1[1]*v1[1]), 7.0f);
+	drawText("V2: %f", sqrt(v2[0]*v2[0] + v2[1]*v2[1]), 6.0f);
+	drawText("DX1: %f", p1.getDistanceFrom(prev1).getModulus(), 5.0f);
+	drawText("DX2: %f", p2.getDistanceFrom(prev2).getModulus(), 4.0f);
+	drawText("X1: %f", p1.getDistanceFrom(*new Vector(startx1, 2)).getModulus(), 3.0f);
+	drawText("X2: %f", p2.getDistanceFrom(*new Vector(startx2, 2)).getModulus(), 2.0f);
 
 	drawSquare (*new Vector(x1[0], x1[1]), 0.2);
 	glColor3f (1.0f, 0.0f, 0.0f);
