@@ -1,7 +1,8 @@
 #include <GL/freeglut.h>
 #include <GL/gl.h>
-#include <math.h>
+#include <cmath>
 #include <stdio.h>
+#include <iostream>
 #include <sys/time.h>
 #include <unistd.h>
 
@@ -25,15 +26,14 @@
  */
 #define e 1
 
-Vector* v = new Vector();
-float startx1[2] = {-10.0f, 10.0f},
-      startx2[2] = {10.0f, 10.0f},
-      startv1[2] = {5.0f, -5.0f},
-      startv2[2] = {-5.0f, -5.0f};
-float x1[2] = {startx1[0],startx1[1]},
-      x2[2] = {startx2[0],startx2[1]},
-      v1[2] = {startv1[0],startv1[1]},
-      v2[2] = {startv2[0],startv2[1]};
+Vector& startx1 = *new Vector(-10.0f, 10.0f),
+	startx2 = *new Vector(10.0f, 10.0f),
+	startv1 = *new Vector(5.0f, -5.0f),
+	startv2 = *new Vector(-5.0f, -5.0f);
+float *x1 = startx1.toArray(2),
+      *x2 = startx2.toArray(2),
+      *v1 = startv1.toArray(2),
+      *v2 = startv2.toArray(2);
 const Vector& refPos = *new Vector(0.0f, 9.0f);
 
 struct timeval start;
@@ -82,13 +82,12 @@ void CalculatePositions () {
 	}
 }
 
-//void drawText(const char* text, const int length, const float height)
 void drawText(const char* format, float value, float height, int length = 15)
 {
 	glPushMatrix();
 	glTranslatef(-10.0f, height, 0.0f);
 	glScalef(0.005f, 0.005f, 0.005f);
-        char text[length];
+        char text[length] = {'\0'};
 	sprintf(text, format, value);
 	int i = 0;
 	for (; i < length; i++)
@@ -96,7 +95,6 @@ void drawText(const char* format, float value, float height, int length = 15)
 	glPopMatrix();
 }
 
-// 60 FPS = at least 17 milliseconds
 void display () {
 	struct timeval start, end;
 	gettimeofday(&start, NULL);
@@ -116,17 +114,19 @@ void display () {
 	drawText("Kinetic: %f", kinetic, 8.0f);
 	drawText("V1: %f", sqrt(v1[0]*v1[0] + v1[1]*v1[1]), 7.0f);
 	drawText("V2: %f", sqrt(v2[0]*v2[0] + v2[1]*v2[1]), 6.0f);
-	drawText("DX1: %f", p1.getDistanceFrom(prev1).getModulus(), 5.0f);
-	drawText("DX2: %f", p2.getDistanceFrom(prev2).getModulus(), 4.0f);
-	drawText("X1: %f", p1.getDistanceFrom(*new Vector(startx1, 2)).getModulus(), 3.0f);
-	drawText("X2: %f", p2.getDistanceFrom(*new Vector(startx2, 2)).getModulus(), 2.0f);
+	
+	drawText("DX1: %f", p1.getDistanceFrom(prev1), 5.0f);
+	drawText("DX2: %f", p2.getDistanceFrom(prev2), 4.0f);
+	drawText("X1: %f", p1.getDistanceFrom(startx1), 3.0f);
+	drawText("X2: %f", p2.getDistanceFrom(startx2), 2.0f);
 
-	drawSquare (*new Vector(x1[0], x1[1]), 0.2);
+        drawSquare (*new Vector(x1[0], x1[1]), 0.2);
 	glColor3f (1.0f, 0.0f, 0.0f);
 	drawSquare (*new Vector(x2[0], x2[1]), 0.2);
 	glColor3f(0.0f, 1.0f, 0.0f);
 	drawSquare (refPos, 1.0f);
 
+	// 17 milliseconds = 60FPS
 	int minTimeFrame = 17;
 	gettimeofday(&end, NULL);
 	long mstart = start.tv_sec * 1000 + start.tv_usec/1000.0 + 0.5;
