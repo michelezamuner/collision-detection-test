@@ -5,8 +5,7 @@
 #include <iostream>
 #include <sys/time.h>
 #include <unistd.h>
-
-#include "Vector.h"
+#include <slc/Vector.h>
 
 /**
  * Masses
@@ -25,6 +24,8 @@
  * Elasticity (<= 1)
  */
 #define e 1
+
+using slc::Vector;
 
 Vector& startx1 = *new Vector(-10.0f, 10.0f),
 	startx2 = *new Vector(10.0f, 10.0f),
