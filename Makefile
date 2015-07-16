@@ -3,7 +3,7 @@ OBJECTS = ex1.o Vector.o
 EXECUTABLES = ex1 ex2
 
 ex1: $(OBJECTS)
-	@g++ $(OBJECTS) -l GL -lglut -o ex1
+	@g++ $(OBJECTS) -lGL -lglut -o ex1
 
 run: ex1
 	./ex1
