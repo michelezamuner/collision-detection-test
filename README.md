@@ -1,10 +1,16 @@
-Compiling exercise1:
+To compile and run exercise 1:
+```
+$ make ex1
+$ ./ex1
+```
+
+or, more quickly:
 
 ```
-g++ -oex1 ex1.cpp -lGL -lglut
+$ make run
 ```
 
-Compiling exercise2:
+To compile exercise 2:
 
 ```
 g++ -oex2 ex2.cpp -lGL -lglut -lGLU
