@@ -29,14 +29,16 @@ If getting an error like
 
     Inconsistency detected by ld.so: dl-version.c: 224: _dl_check_map_versions: Assertion `needed != ((void *)0)' failed!
 
-preload libGL static library:
+preload libGL static library and run:
 
 ```
-$ export LD_PRELOAD=/usr/lib/i386-linux-gnu/mesa/libGL.so.1 make run
+$ export LD_PRELOAD=/usr/lib/i386-linux-gnu/mesa/libGL.so.1
+$ make run
 ```
 
 or, on x86_64 systems:
 
 ```
 $ export LD_PRELOAD=/usr/lib/x86_64-linux-gnu/mesa/libGL.so.1
+$ make run
 ```
